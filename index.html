@@ -23,13 +23,6 @@
             --text-light: #8a96a6;
         }
 
-        [data-theme="dark"] {
-            --bg-light: #1a2035;
-            --bg-white: #0f1525;
-            --text-dark: #e4e8ef;
-            --text-muted: #9aa5b8;
-            --text-light: #6a7588;
-        }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -66,14 +59,12 @@
             background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(26,39,68,0.08); transition: all 0.4s;
         }
-        [data-theme="dark"] nav { background: rgba(15,21,37,0.95); border-color: rgba(255,255,255,0.06); }
         nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.1); }
         .nav-inner {
             max-width: 1200px; margin: 0 auto;
             display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 2rem;
         }
         .nav-logo img { height: 48px; }
-        [data-theme="dark"] .nav-logo img { filter: brightness(1.2); }
         .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
         .nav-links a {
             text-decoration: none; color: var(--text-dark); font-weight: 500; font-size: 0.95rem;
@@ -94,7 +85,6 @@
             background: transparent; cursor: pointer; font-size: 1.1rem;
             display: flex; align-items: center; justify-content: center; transition: all 0.3s;
         }
-        [data-theme="dark"] .theme-toggle { border-color: rgba(255,255,255,0.1); }
         .theme-toggle:hover { background: var(--bg-light); }
 
         /* Language toggle */
@@ -103,7 +93,6 @@
             background: transparent; cursor: pointer; font-size: 0.8rem; font-weight: 600;
             color: var(--text-muted); transition: all 0.3s;
         }
-        [data-theme="dark"] .lang-toggle { border-color: rgba(255,255,255,0.1); }
         .lang-toggle:hover { background: var(--bg-light); color: var(--teal); }
 
         .btn {
@@ -709,8 +698,7 @@
             <li>
                 <div class="nav-right">
                     <button class="lang-toggle" onclick="toggleLang()" id="langBtn">EN</button>
-                    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">&#9790;</button>
-                    <a href="#contact" class="btn btn-primary">Get a Demo</a>
+                    <a href="#contact" class="btn btn-teal btn-large" style="padding: 0.6rem 1.6rem; font-size: 0.95rem; border-radius: 8px;">Get a Demo</a>
                 </div>
             </li>
         </ul>
@@ -1122,12 +1110,6 @@ window.addEventListener('scroll', () => {
 function toggleMenu() { document.getElementById('navLinks').classList.toggle('open'); }
 document.querySelectorAll('.nav-links a').forEach(l => l.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open')));
 
-// ── Dark Mode ──
-function toggleTheme() {
-    const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = t;
-    document.getElementById('themeBtn').textContent = t === 'dark' ? '\u2600' : '\u263E';
-}
 
 // ── Language Toggle ──
 let currentLang = 'en';
