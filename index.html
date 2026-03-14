@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaerdy — Cement Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1a2744;
+            --navy-light: #243352;
+            --teal: #0d8b8b;
+            --teal-light: #11a5a5;
+            --green: #3a9e3f;
+            --yellow: #c9c830;
+            --gold: #d4a843;
+            --bg-light: #f7f9fc;
+            --bg-white: #ffffff;
+            --text-dark: #1a2744;
+            --text-muted: #5a6a7a;
+            --text-light: #8a96a6;
+        }
+
+        [data-theme="dark"] {
+            --bg-light: #1a2035;
+            --bg-white: #0f1525;
+            --text-dark: #e4e8ef;
+            --text-muted: #9aa5b8;
+            --text-light: #6a7588;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background: var(--bg-white);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ── Loader ── */
+        .loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--navy); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.6s, visibility 0.6s;
+        }
+        .loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loader-logo { width: 180px; animation: loaderPulse 1.2s ease-in-out infinite; }
+        @keyframes loaderPulse { 0%,100% { opacity: 0.4; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
+
+        /* ── Scroll Progress ── */
+        .scroll-progress {
+            position: fixed; top: 0; left: 0; height: 3px; z-index: 1001;
+            background: linear-gradient(90deg, var(--teal), var(--green), var(--yellow));
+            width: 0%; transition: width 0.1s;
+        }
+
+        /* ── Navigation ── */
+        nav {
+            position: fixed; top: 3px; width: 100%; z-index: 1000;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(26,39,68,0.08); transition: all 0.4s;
+        }
+        [data-theme="dark"] nav { background: rgba(15,21,37,0.95); border-color: rgba(255,255,255,0.06); }
+        nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.1); }
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 2rem;
+        }
+        .nav-logo img { height: 48px; }
+        [data-theme="dark"] .nav-logo img { filter: brightness(1.2); }
+        .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-dark); font-weight: 500; font-size: 0.95rem;
+            transition: color 0.2s; position: relative;
+        }
+        .nav-links a:not(.btn)::after {
+            content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+            background: var(--teal); transition: width 0.3s;
+        }
+        .nav-links a:not(.btn):hover::after { width: 100%; }
+        .nav-links a:hover { color: var(--teal); }
+
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(26,39,68,0.1);
+            background: transparent; cursor: pointer; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s;
+        }
+        [data-theme="dark"] .theme-toggle { border-color: rgba(255,255,255,0.1); }
+        .theme-toggle:hover { background: var(--bg-light); }
+
+        /* Language toggle */
+        .lang-toggle {
+            padding: 0.3rem 0.8rem; border-radius: 6px; border: 1px solid rgba(26,39,68,0.1);
+            background: transparent; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            color: var(--text-muted); transition: all 0.3s;
+        }
+        [data-theme="dark"] .lang-toggle { border-color: rgba(255,255,255,0.1); }
+        .lang-toggle:hover { background: var(--bg-light); color: var(--teal); }
+
+        .btn {
+            display: inline-block; padding: 0.7rem 1.8rem; border-radius: 8px;
+            font-weight: 600; font-size: 0.95rem; text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1); cursor: pointer; border: none;
+        }
+        .btn-primary { background: var(--navy); color: #fff; }
+        .btn-primary:hover { background: var(--navy-light); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,39,68,0.35); }
+        .btn-teal { background: var(--teal); color: #fff; }
+        .btn-teal:hover { background: var(--teal-light); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(13,139,139,0.4); }
+        .btn-large { padding: 1rem 2.5rem; font-size: 1.05rem; border-radius: 10px; }
+        .btn-outline { border: 2px solid var(--navy); color: var(--navy); background: transparent; }
+        .btn-outline:hover { background: var(--navy); color: #fff; }
+        .btn-white { background: #fff; color: var(--navy); }
+        .btn-white:hover { background: rgba(255,255,255,0.9); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,255,255,0.3); }
+
+        /* ── Floating CTA ── */
+        .floating-cta {
+            position: fixed; bottom: 2rem; right: 2rem; z-index: 998;
+            opacity: 0; transform: translateY(20px) scale(0.9);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1); pointer-events: none;
+        }
+        .floating-cta.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+        .floating-cta a {
+            display: flex; align-items: center; gap: 0.6rem; padding: 1rem 1.8rem;
+            background: var(--teal); color: #fff; border-radius: 50px; text-decoration: none;
+            font-weight: 700; font-size: 0.95rem; box-shadow: 0 8px 30px rgba(13,139,139,0.4); transition: all 0.3s;
+        }
+        .floating-cta a:hover { background: var(--teal-light); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(13,139,139,0.5); }
+        .pulse-dot { width: 10px; height: 10px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.6; transform:scale(1.4); } }
+
+        /* ── Chat Widget ── */
+        .chat-widget {
+            position: fixed; bottom: 2rem; left: 2rem; z-index: 998;
+        }
+        .chat-bubble {
+            width: 60px; height: 60px; border-radius: 50%; background: var(--navy);
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2); transition: all 0.3s; font-size: 1.5rem; color: #fff;
+        }
+        .chat-bubble:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(0,0,0,0.3); }
+        .chat-window {
+            position: absolute; bottom: 70px; left: 0; width: 340px;
+            background: var(--bg-white); border-radius: 16px;
+            box-shadow: 0 12px 50px rgba(0,0,0,0.15); overflow: hidden;
+            transform: scale(0.8) translateY(20px); opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1); pointer-events: none;
+            border: 1px solid rgba(26,39,68,0.08);
+        }
+        .chat-window.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+        .chat-header {
+            background: var(--navy); color: #fff; padding: 1.2rem 1.5rem;
+            display: flex; align-items: center; gap: 0.8rem;
+        }
+        .chat-header-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+        .chat-header-text h4 { font-size: 0.95rem; font-weight: 700; }
+        .chat-header-text p { font-size: 0.75rem; opacity: 0.7; }
+        .chat-body { padding: 1.5rem; min-height: 200px; }
+        .chat-msg {
+            padding: 0.8rem 1rem; border-radius: 12px; margin-bottom: 0.8rem;
+            font-size: 0.88rem; line-height: 1.5; max-width: 85%;
+        }
+        .chat-msg.bot { background: var(--bg-light); color: var(--text-dark); }
+        .chat-msg.user { background: var(--teal); color: #fff; margin-left: auto; }
+        .chat-input {
+            display: flex; border-top: 1px solid rgba(26,39,68,0.08); padding: 0.8rem;
+        }
+        .chat-input input {
+            flex: 1; border: 1px solid rgba(26,39,68,0.1); border-radius: 8px;
+            padding: 0.6rem 1rem; font-size: 0.88rem; outline: none; font-family: inherit;
+            background: var(--bg-white); color: var(--text-dark);
+        }
+        .chat-input button {
+            margin-left: 0.5rem; background: var(--teal); color: #fff; border: none;
+            border-radius: 8px; padding: 0.6rem 1rem; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center; position: relative;
+            overflow: hidden; background: var(--navy); padding-top: 80px;
+        }
+        .hero-particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .hero-particles canvas { width: 100%; height: 100%; }
+        .hero-grid-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px; animation: gridMove 20s linear infinite; pointer-events: none;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(60px,60px); } }
+        .hero::before {
+            content: ''; position: absolute; top: -50%; right: -20%; width: 80%; height: 200%;
+            background: radial-gradient(ellipse, rgba(13,139,139,0.15) 0%, transparent 70%);
+            pointer-events: none; animation: heroGlow 8s ease-in-out infinite alternate;
+        }
+        @keyframes heroGlow { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-5%,3%) scale(1.1); } }
+        .hero::after {
+            content: ''; position: absolute; bottom: -30%; left: -10%; width: 60%; height: 100%;
+            background: radial-gradient(ellipse, rgba(58,158,63,0.08) 0%, transparent 70%);
+            pointer-events: none; animation: heroGlow2 10s ease-in-out infinite alternate;
+        }
+        @keyframes heroGlow2 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(3%,-2%) scale(1.05); } }
+        .hero-inner {
+            max-width: 1200px; margin: 0 auto; padding: 4rem 2rem;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+            align-items: center; position: relative; z-index: 1;
+        }
+        .hero-text h1 { font-size: 3.8rem; font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .hero-text h1 span {
+            background: linear-gradient(135deg, var(--teal-light), var(--green), var(--yellow));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem;
+            background: rgba(13,139,139,0.15); border: 1px solid rgba(13,139,139,0.3);
+            border-radius: 50px; color: var(--teal-light); font-size: 0.82rem; font-weight: 600;
+            margin-bottom: 1.5rem; letter-spacing: 0.5px;
+        }
+        .hero-subtitle { font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-bottom: 2.5rem; line-height: 1.7; max-width: 520px; }
+        .hero-buttons { display: flex; gap: 1rem; margin-bottom: 3.5rem; }
+        .hero-stats { display: flex; gap: 3rem; }
+        .hero-stat { text-align: left; }
+        .hero-stat-number {
+            font-size: 2.2rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--teal-light), var(--green));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-stat-label { font-size: 0.82rem; color: rgba(255,255,255,0.45); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .hero-visual { display: flex; justify-content: center; align-items: center; }
+        .hero-card {
+            background: rgba(255,255,255,0.06); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem;
+            width: 100%; max-width: 460px;
+        }
+        .hero-card-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem; }
+        .hero-card-icon {
+            width: 44px; height: 44px; background: linear-gradient(135deg, var(--teal), var(--green));
+            border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+        }
+        .hero-card-title { color: #fff; font-weight: 600; font-size: 1.1rem; }
+        .hero-card-live { margin-left: auto; display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: #4ade80; font-weight: 600; }
+        .live-dot { width: 6px; height: 6px; background: #4ade80; border-radius: 50%; animation: pulse 1.5s infinite; }
+        .hero-card-item { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .hero-card-item:last-child { border-bottom: none; }
+        .hero-card-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .dot-teal { background: var(--teal); } .dot-green { background: var(--green); }
+        .dot-yellow { background: var(--gold); } .dot-blue { background: #4a90d9; }
+        .hero-card-item-text { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
+        .hero-card-item-value { margin-left: auto; color: var(--teal-light); font-weight: 700; font-size: 0.95rem; }
+        .hero-card-result {
+            margin-top: 1.2rem; padding: 1rem; background: rgba(13,139,139,0.15);
+            border-radius: 10px; border-left: 3px solid var(--teal-light);
+        }
+        .hero-card-result-title { color: var(--teal-light); font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; }
+        .hero-card-result-text { color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+
+        /* ── Sources Ticker ── */
+        .sources-ticker {
+            background: var(--navy-light); padding: 1rem 0; overflow: hidden; position: relative; z-index: 1;
+        }
+        .ticker-track {
+            display: flex; animation: tickerScroll 30s linear infinite; width: max-content;
+        }
+        .ticker-item {
+            display: flex; align-items: center; gap: 0.5rem; padding: 0 2.5rem;
+            white-space: nowrap; color: rgba(255,255,255,0.4); font-size: 0.82rem; font-weight: 500;
+        }
+        .ticker-item strong { color: rgba(255,255,255,0.6); }
+        @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* ── Section Commons ── */
+        section { padding: 7rem 2rem; }
+        .section-inner { max-width: 1200px; margin: 0 auto; }
+        .section-label { display: inline-block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--teal); margin-bottom: 1rem; }
+        .section-title { font-size: 2.8rem; font-weight: 900; margin-bottom: 1.2rem; line-height: 1.15; letter-spacing: -0.02em; }
+        .section-subtitle { font-size: 1.15rem; color: var(--text-muted); max-width: 600px; margin-bottom: 3.5rem; line-height: 1.7; }
+        .text-center { text-align: center; }
+        .text-center .section-subtitle { margin-left: auto; margin-right: auto; }
+
+        /* ── Problem Section ── */
+        .problem { background: var(--bg-light); }
+        .problem-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+        .problem-card {
+            background: var(--bg-white); border-radius: 16px; padding: 2.5rem;
+            border: 1px solid rgba(26,39,68,0.06); transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .problem-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        .problem-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.5rem; }
+        .problem-icon.red { background: rgba(220,60,60,0.1); }
+        .problem-icon.orange { background: rgba(220,140,40,0.1); }
+        .problem-icon.purple { background: rgba(120,80,200,0.1); }
+        .problem-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.8rem; }
+        .problem-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; }
+
+        /* ── Stat Banner ── */
+        .stat-banner { background: var(--navy); padding: 5rem 2rem; }
+        .stat-banner-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; text-align: center; }
+        .stat-item { padding: 1.5rem; }
+        .stat-number {
+            font-size: 3.2rem; font-weight: 900; margin-bottom: 0.5rem; letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--teal-light), var(--green), var(--yellow));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .stat-label { color: rgba(255,255,255,0.55); font-size: 0.9rem; font-weight: 500; line-height: 1.5; }
+
+        /* ── Platform ── */
+        .platform { background: var(--bg-white); }
+        .platform-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+        .platform-card {
+            padding: 2.5rem; border-radius: 16px; border: 1px solid rgba(26,39,68,0.08);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;
+            background: var(--bg-white);
+        }
+        .platform-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--teal), var(--green)); opacity: 0; transition: opacity 0.3s; }
+        .platform-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        .platform-card:hover::before { opacity: 1; }
+        .platform-card-icon { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, rgba(13,139,139,0.1), rgba(58,158,63,0.1)); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1.5rem; transition: transform 0.3s; }
+        .platform-card:hover .platform-card-icon { transform: scale(1.1); }
+        .platform-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; }
+        .platform-card p { color: var(--text-muted); font-size: 0.93rem; line-height: 1.65; }
+
+        /* ── Before/After ── */
+        .before-after { background: var(--bg-light); }
+        .ba-container { max-width: 900px; margin: 0 auto; position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        .ba-wrapper { position: relative; width: 100%; aspect-ratio: 16/9; }
+        .ba-side {
+            position: absolute; top: 0; height: 100%; padding: 3rem;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .ba-before { left: 0; width: 50%; background: linear-gradient(135deg, #2d1a1a, #1a1a2d); color: rgba(255,255,255,0.8); }
+        .ba-after { right: 0; width: 50%; background: linear-gradient(135deg, #0f2a2a, #1a2d1a); color: rgba(255,255,255,0.8); }
+        .ba-label {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 1.5rem; padding: 0.3rem 0.8rem; border-radius: 4px; display: inline-block; width: fit-content;
+        }
+        .ba-before .ba-label { background: rgba(220,60,60,0.2); color: #ff6b6b; }
+        .ba-after .ba-label { background: rgba(13,139,139,0.2); color: var(--teal-light); }
+        .ba-item { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; font-size: 0.9rem; }
+        .ba-icon-bad { color: #ff6b6b; } .ba-icon-good { color: #4ade80; }
+        .ba-slider-line {
+            position: absolute; top: 0; bottom: 0; width: 4px; background: #fff; left: 50%; z-index: 10;
+            cursor: ew-resize; transform: translateX(-50%);
+        }
+        .ba-slider-handle {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 44px; height: 44px; background: #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-weight: 700; color: var(--navy); font-size: 0.8rem; z-index: 11;
+            cursor: ew-resize;
+        }
+
+        /* ── How It Works ── */
+        .how-it-works { background: var(--bg-white); }
+        .steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; position: relative; }
+        .steps::before { content: ''; position: absolute; top: 36px; left: 12.5%; right: 12.5%; height: 2px; background: linear-gradient(90deg, var(--teal), var(--green), var(--yellow)); z-index: 0; }
+        .step { text-align: center; position: relative; z-index: 1; }
+        .step-number {
+            width: 72px; height: 72px; border-radius: 50%; background: var(--bg-white);
+            border: 3px solid var(--teal); display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 800; color: var(--teal); margin: 0 auto 1.2rem; transition: all 0.3s;
+        }
+        .step:hover .step-number { background: var(--teal); color: #fff; transform: scale(1.1); box-shadow: 0 8px 25px rgba(13,139,139,0.3); }
+        .step h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .step p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+        /* ── AI Infographic ── */
+        .ai-infographic { background: var(--navy); color: #fff; overflow: hidden; }
+        .ai-infographic .section-label { color: var(--teal-light); }
+        .ai-infographic .section-title { color: #fff; }
+        .ai-infographic .section-subtitle { color: rgba(255,255,255,0.6); }
+        .ai-flow { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
+        .ai-signal {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 1.8rem; text-align: center; width: 180px;
+            transition: all 0.4s; position: relative;
+        }
+        .ai-signal:hover { transform: translateY(-6px); background: rgba(255,255,255,0.1); border-color: var(--teal); }
+        .ai-signal-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+        .ai-signal h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .ai-signal p { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+        .ai-arrow { font-size: 1.5rem; color: var(--teal-light); animation: arrowPulse 1.5s ease-in-out infinite; }
+        @keyframes arrowPulse { 0%,100% { opacity: 0.5; transform: translateX(0); } 50% { opacity: 1; transform: translateX(5px); } }
+        .ai-brain {
+            background: linear-gradient(135deg, rgba(13,139,139,0.2), rgba(58,158,63,0.2));
+            border: 2px solid var(--teal); border-radius: 20px; padding: 2rem; text-align: center;
+            width: 200px; position: relative;
+        }
+        .ai-brain-icon { font-size: 2.5rem; margin-bottom: 0.5rem; animation: brainPulse 3s ease-in-out infinite; }
+        @keyframes brainPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .ai-brain h4 { font-size: 1rem; font-weight: 700; }
+        .ai-brain p { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
+        .ai-output {
+            background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3);
+            border-radius: 16px; padding: 1.8rem; width: 220px;
+        }
+        .ai-output h4 { color: #4ade80; font-size: 0.9rem; font-weight: 700; margin-bottom: 0.8rem; }
+        .ai-output-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.82rem; color: rgba(255,255,255,0.7); }
+
+        /* ── ROI Calculator ── */
+        .calculator { background: var(--bg-light); }
+        .calc-container { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+        .calc-inputs { background: var(--bg-white); border-radius: 20px; padding: 2.5rem; border: 1px solid rgba(26,39,68,0.06); }
+        .calc-inputs h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .calc-inputs > p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+        .calc-field { margin-bottom: 1.5rem; }
+        .calc-field label { display: block; font-size: 0.88rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem; }
+        .calc-field input[type="range"] { width: 100%; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--teal), var(--green)); outline: none; }
+        .calc-field input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--teal); cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
+        .calc-field input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        .calc-range-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-light); margin-top: 0.3rem; }
+        .calc-current-value { text-align: right; font-weight: 700; color: var(--teal); font-size: 1.1rem; }
+        .calc-results { background: var(--navy); border-radius: 20px; padding: 2.5rem; color: #fff; }
+        .calc-results h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem; color: #fff; }
+        .calc-result-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .calc-result-item:last-child { border-bottom: none; }
+        .calc-result-label { color: rgba(255,255,255,0.6); font-size: 0.93rem; }
+        .calc-result-value { font-weight: 700; font-size: 1.1rem; }
+        .calc-total-box { margin-top: 1.5rem; padding: 1.5rem; background: rgba(13,139,139,0.15); border-radius: 12px; text-align: center; }
+        .calc-total-label { color: rgba(255,255,255,0.5); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; }
+        .calc-total-value { font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, var(--teal-light), var(--green), var(--yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .calc-total-sub { color: rgba(255,255,255,0.4); font-size: 0.85rem; margin-top: 0.3rem; }
+
+        /* ── Case Study Teaser ── */
+        .case-study { background: var(--bg-white); }
+        .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+        .case-visual {
+            background: linear-gradient(135deg, var(--navy), var(--navy-light)); border-radius: 20px;
+            padding: 3rem; color: #fff; position: relative; overflow: hidden;
+        }
+        .case-visual::before {
+            content: ''; position: absolute; top: -50%; right: -30%; width: 80%; height: 200%;
+            background: radial-gradient(ellipse, rgba(13,139,139,0.15) 0%, transparent 60%); pointer-events: none;
+        }
+        .case-big-number {
+            font-size: 5rem; font-weight: 900; line-height: 1;
+            background: linear-gradient(135deg, var(--teal-light), var(--green), var(--yellow));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .case-big-label { color: rgba(255,255,255,0.6); font-size: 1.1rem; margin-top: 0.5rem; margin-bottom: 2rem; }
+        .case-mini-stats { display: flex; gap: 2rem; }
+        .case-mini-stat h4 { font-size: 1.5rem; font-weight: 800; color: var(--teal-light); }
+        .case-mini-stat p { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+        .case-text h3 { font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem; }
+        .case-text p { color: var(--text-muted); font-size: 1rem; line-height: 1.8; margin-bottom: 1.5rem; }
+        .case-form { background: var(--bg-light); border-radius: 12px; padding: 1.5rem; }
+        .case-form h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; }
+        .case-form input {
+            width: 100%; padding: 0.7rem 1rem; border: 1px solid rgba(26,39,68,0.1); border-radius: 8px;
+            font-family: inherit; font-size: 0.9rem; margin-bottom: 0.8rem; outline: none;
+            background: var(--bg-white); color: var(--text-dark);
+        }
+        .case-form input:focus { border-color: var(--teal); }
+
+        /* ── Testimonials ── */
+        .testimonials { background: var(--bg-light); overflow: hidden; }
+        .testimonial-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+        .testimonial-card {
+            background: var(--bg-white); border-radius: 16px; padding: 2.5rem;
+            border: 1px solid rgba(26,39,68,0.06); transition: all 0.4s; position: relative;
+        }
+        .testimonial-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
+        .testimonial-card::before { content: '\201C'; position: absolute; top: 1.2rem; right: 1.5rem; font-size: 4rem; color: rgba(13,139,139,0.1); font-family: Georgia, serif; line-height: 1; }
+        .testimonial-stars { color: var(--gold); font-size: 1rem; letter-spacing: 2px; margin-bottom: 1rem; }
+        .testimonial-text { color: var(--text-dark); font-size: 1rem; line-height: 1.7; font-style: italic; margin-bottom: 1.5rem; }
+        .testimonial-author { display: flex; align-items: center; gap: 0.8rem; }
+        .testimonial-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #fff; }
+        .testimonial-author-info h4 { font-size: 0.9rem; font-weight: 700; }
+        .testimonial-author-info p { font-size: 0.8rem; color: var(--text-light); }
+
+        /* ── Competitive Edge ── */
+        .competitive { background: var(--navy); color: #fff; }
+        .competitive .section-label { color: var(--teal-light); }
+        .competitive .section-title { color: #fff; }
+        .competitive .section-subtitle { color: rgba(255,255,255,0.6); }
+        .edge-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+        .edge-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 2.5rem; transition: all 0.4s; }
+        .edge-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .edge-icon { font-size: 2rem; margin-bottom: 1rem; display: inline-block; transition: transform 0.3s; }
+        .edge-card:hover .edge-icon { transform: scale(1.2) rotate(5deg); }
+        .edge-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .edge-card p { color: rgba(255,255,255,0.6); font-size: 0.93rem; line-height: 1.6; }
+
+        /* ── Story ── */
+        .story { background: var(--bg-white); }
+        .story-content { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+        .story-text p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.85; margin-bottom: 1.5rem; }
+        .story-quote { font-size: 1.5rem; font-weight: 600; font-style: italic; color: var(--navy); border-left: 4px solid var(--teal); padding-left: 1.5rem; margin: 2.5rem 0; line-height: 1.5; }
+        [data-theme="dark"] .story-quote { color: var(--text-dark); }
+        .story-values { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+        .story-value { text-align: center; padding: 2rem 1rem; background: var(--bg-light); border-radius: 16px; transition: all 0.3s; }
+        .story-value:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
+        .story-value-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+        .story-value h4 { font-size: 1rem; font-weight: 700; }
+        .story-value p { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem; }
+        .story-box { margin-top: 2rem; padding: 2rem; background: var(--bg-light); border-radius: 16px; transition: all 0.3s; }
+        .story-box:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
+        .story-box h4 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+        .story-box p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; }
+
+        /* ── Team ── */
+        .team { background: var(--bg-light); }
+        .team-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; }
+        .team-card { text-align: center; padding: 2.5rem 1.5rem; border-radius: 20px; background: var(--bg-white); border: 1px solid rgba(26,39,68,0.06); transition: all 0.4s; }
+        .team-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        .team-avatar { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 800; color: #fff; transition: transform 0.3s; }
+        .team-card:hover .team-avatar { transform: scale(1.08); }
+        .avatar-1 { background: linear-gradient(135deg, var(--teal), #1a7fb8); }
+        .avatar-2 { background: linear-gradient(135deg, var(--green), var(--teal)); }
+        .avatar-3 { background: linear-gradient(135deg, var(--gold), #e08a3a); }
+        .avatar-4 { background: linear-gradient(135deg, #6a5acd, var(--teal)); }
+        .team-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.2rem; }
+        .team-role { color: var(--teal); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.8rem; }
+        .team-bio { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; }
+
+        /* ── FAQ ── */
+        .faq { background: var(--bg-white); }
+        .faq-grid { max-width: 800px; margin: 0 auto; }
+        .faq-item { border: 1px solid rgba(26,39,68,0.08); border-radius: 12px; margin-bottom: 1rem; overflow: hidden; transition: all 0.3s; background: var(--bg-white); }
+        .faq-item:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .faq-question { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; font-weight: 600; font-size: 1.05rem; transition: background 0.3s; }
+        .faq-question:hover { background: var(--bg-light); }
+        .faq-chevron { font-size: 1.2rem; color: var(--teal); transition: transform 0.3s; flex-shrink: 0; margin-left: 1rem; }
+        .faq-item.open .faq-chevron { transform: rotate(180deg); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+        .faq-item.open .faq-answer { max-height: 300px; }
+        .faq-answer-inner { padding: 0 2rem 1.5rem; color: var(--text-muted); line-height: 1.7; font-size: 0.95rem; }
+
+        /* ── Compliance Badges ── */
+        .compliance { display: flex; align-items: center; justify-content: center; gap: 2rem; margin-top: 2rem; flex-wrap: wrap; }
+        .compliance-badge {
+            display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.78rem;
+            color: rgba(255,255,255,0.4); font-weight: 600;
+        }
+        .compliance-badge-icon { font-size: 1rem; }
+
+        /* ── Partners ── */
+        .partners { background: var(--bg-light); padding: 4rem 2rem; }
+        .partners-logos { display: flex; justify-content: center; align-items: center; gap: 4rem; margin-top: 2rem; }
+        .partners-logos img { height: 60px; opacity: 0.6; transition: all 0.3s; }
+        .partners-logos img:hover { opacity: 1; transform: scale(1.05); }
+
+        /* ── CTA ── */
+        .cta {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            text-align: center; padding: 8rem 2rem; position: relative; overflow: hidden;
+        }
+        .cta::before { content: ''; position: absolute; top: -50%; left: -20%; width: 140%; height: 200%; background: radial-gradient(ellipse at center, rgba(13,139,139,0.12) 0%, transparent 60%); pointer-events: none; animation: heroGlow 10s ease-in-out infinite alternate; }
+        .cta-inner { position: relative; z-index: 1; }
+        .cta h2 { font-size: 3rem; font-weight: 900; color: #fff; margin-bottom: 1.2rem; letter-spacing: -0.02em; }
+        .cta p { font-size: 1.2rem; color: rgba(255,255,255,0.6); margin-bottom: 2.5rem; max-width: 550px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+        .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .cta-trust { margin-top: 2rem; color: rgba(255,255,255,0.35); font-size: 0.85rem; }
+
+        /* ── Booking embed ── */
+        .booking-embed {
+            max-width: 500px; margin: 2rem auto 0; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem;
+        }
+        .booking-embed h4 { color: #fff; font-size: 1rem; margin-bottom: 1rem; text-align: left; }
+        .booking-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem; }
+        .booking-embed input, .booking-embed select {
+            width: 100%; padding: 0.7rem 1rem; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+            background: rgba(255,255,255,0.05); color: #fff; font-family: inherit; font-size: 0.9rem; outline: none;
+        }
+        .booking-embed input::placeholder { color: rgba(255,255,255,0.4); }
+        .booking-embed select { color: rgba(255,255,255,0.7); }
+        .booking-embed select option { background: var(--navy); color: #fff; }
+        .booking-embed input:focus, .booking-embed select:focus { border-color: var(--teal); }
+
+        /* ── Exit Intent Popup ── */
+        .exit-popup {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.4s;
+        }
+        .exit-popup.show { opacity: 1; visibility: visible; }
+        .exit-popup-card {
+            background: var(--bg-white); border-radius: 20px; padding: 3rem; max-width: 480px;
+            width: 90%; position: relative; transform: scale(0.9) translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .exit-popup.show .exit-popup-card { transform: scale(1) translateY(0); }
+        .exit-popup-close {
+            position: absolute; top: 1rem; right: 1rem; width: 36px; height: 36px;
+            border-radius: 50%; border: none; background: var(--bg-light); cursor: pointer;
+            font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+            color: var(--text-muted);
+        }
+        .exit-popup-close:hover { background: rgba(220,60,60,0.1); color: #dc3c3c; }
+        .exit-popup-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .exit-popup-card h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .exit-popup-card > p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; }
+        .exit-popup-card input {
+            width: 100%; padding: 0.8rem 1rem; border: 1px solid rgba(26,39,68,0.12); border-radius: 8px;
+            font-family: inherit; font-size: 0.95rem; margin-bottom: 0.8rem; outline: none;
+            background: var(--bg-white); color: var(--text-dark);
+        }
+        .exit-popup-card input:focus { border-color: var(--teal); }
+
+        /* ── Footer ── */
+        footer {
+            background: #0f1a2e; color: rgba(255,255,255,0.5); padding: 4rem 2rem 2rem;
+        }
+        .footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; }
+        .footer-brand img { height: 40px; margin-bottom: 1rem; filter: brightness(0) invert(1); }
+        .footer-brand p { font-size: 0.9rem; line-height: 1.6; }
+        .footer-col h4 { color: #fff; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 1.5px; }
+        .footer-col ul { list-style: none; }
+        .footer-col li { margin-bottom: 0.7rem; }
+        .footer-col a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem; transition: all 0.2s; }
+        .footer-col a:hover { color: var(--teal-light); padding-left: 4px; }
+        .footer-bottom { max-width: 1200px; margin: 2.5rem auto 0; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; font-size: 0.85rem; }
+
+        /* ── Animations ── */
+        .fade-in { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        .fade-in-left { opacity: 0; transform: translateX(-40px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+        .fade-in-left.visible { opacity: 1; transform: translateX(0); }
+        .fade-in-right { opacity: 0; transform: translateX(40px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+        .fade-in-right.visible { opacity: 1; transform: translateX(0); }
+        .scale-in { opacity: 0; transform: scale(0.9); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .scale-in.visible { opacity: 1; transform: scale(1); }
+        .delay-1{transition-delay:.1s}.delay-2{transition-delay:.2s}.delay-3{transition-delay:.3s}
+        .delay-4{transition-delay:.4s}.delay-5{transition-delay:.5s}.delay-6{transition-delay:.6s}
+
+        /* ── Hamburger ── */
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+        .hamburger span { width: 24px; height: 2px; background: var(--text-dark); border-radius: 2px; transition: all 0.3s; }
+
+        /* ── Responsive ── */
+        @media(max-width:1024px) {
+            .hero-text h1{font-size:2.8rem} .section-title{font-size:2.2rem}
+            .stat-banner-inner{grid-template-columns:repeat(2,1fr)}
+            .ai-flow{flex-direction:column}
+        }
+        @media(max-width:768px) {
+            .hamburger{display:flex}
+            .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg-white);flex-direction:column;padding:1.5rem 2rem;box-shadow:0 8px 30px rgba(0,0,0,0.1);gap:1rem}
+            .nav-links.open{display:flex}
+            .hero-inner,.calc-container,.story-content,.case-grid{grid-template-columns:1fr;gap:2rem}
+            .hero-text h1{font-size:2.2rem} .hero-stats{gap:2rem} .hero-visual{order:-1}
+            .problem-grid,.platform-grid,.edge-grid,.testimonial-grid{grid-template-columns:1fr}
+            .steps{grid-template-columns:1fr 1fr} .steps::before{display:none}
+            .team-grid{grid-template-columns:repeat(2,1fr)}
+            .cta h2{font-size:2rem} .section-title{font-size:2rem}
+            .footer-inner{grid-template-columns:1fr;gap:2rem}
+            .footer-bottom{flex-direction:column;gap:0.5rem;text-align:center}
+            .partners-logos{flex-direction:column;gap:2rem}
+            .floating-cta{bottom:1rem;right:1rem}
+            .chat-widget{display:none}
+            .ba-side{padding:1.5rem} .ba-side h4,.ba-item{font-size:0.8rem}
+            .booking-row{grid-template-columns:1fr}
+        }
+        @media(max-width:480px) {
+            .hero-text h1{font-size:1.8rem} .hero-stats{flex-direction:column;gap:1rem}
+            .hero-buttons{flex-direction:column} .steps{grid-template-columns:1fr}
+            .team-grid{grid-template-columns:1fr} .stat-banner-inner{grid-template-columns:1fr}
+            .cta-buttons{flex-direction:column;align-items:center}
+            .story-values{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+    <img src="images/img_p1_Image1.jpg" alt="Vaerdy" class="loader-logo">
+</div>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Exit Intent Popup -->
+<div class="exit-popup" id="exitPopup">
+    <div class="exit-popup-card">
+        <button class="exit-popup-close" onclick="closeExitPopup()">&times;</button>
+        <div class="exit-popup-icon">&#128214;</div>
+        <h3>Before You Go...</h3>
+        <p>Download our free whitepaper: <strong>"The &#8364;8.5B Digital Opportunity in Cement Maintenance"</strong> — with insights from McKinsey, Deloitte, and 60+ years of plant floor experience.</p>
+        <input type="email" id="exitEmail" placeholder="Your work email">
+        <button class="btn btn-teal" style="width:100%" onclick="submitExitForm()">Download Free Whitepaper</button>
+        <p style="font-size:0.78rem;color:var(--text-light);margin-top:0.8rem;margin-bottom:0">No spam. Unsubscribe anytime.</p>
+    </div>
+</div>
+
+<!-- Navigation -->
+<nav id="navbar">
+    <div class="nav-inner">
+        <a href="#" class="nav-logo"><img src="images/img_p1_Image1.jpg" alt="Vaerdy"></a>
+        <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#platform">Platform</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#calculator">ROI</a></li>
+            <li><a href="#story">Our Story</a></li>
+            <li><a href="#team">Team</a></li>
+            <li>
+                <div class="nav-right">
+                    <button class="lang-toggle" onclick="toggleLang()" id="langBtn">EN</button>
+                    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">&#9790;</button>
+                    <a href="#contact" class="btn btn-primary">Get a Demo</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Floating CTA -->
+<div class="floating-cta" id="floatingCta">
+    <a href="#contact"><span class="pulse-dot"></span> Book a Demo</a>
+</div>
+
+<!-- Chat Widget -->
+<div class="chat-widget" id="chatWidget">
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <span class="chat-header-dot"></span>
+            <div class="chat-header-text"><h4>Vaerdy Support</h4><p>We typically reply within minutes</p></div>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-msg bot">Hi! How can we help you? Ask about our platform, pricing, or request a demo.</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendChat()">
+            <button onclick="sendChat()">Send</button>
+        </div>
+    </div>
+    <div class="chat-bubble" onclick="toggleChat()">&#128172;</div>
+</div>
+
+<!-- Hero -->
+<section class="hero" id="home">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-particles"><canvas id="particleCanvas"></canvas></div>
+    <div class="hero-inner">
+        <div class="hero-text">
+            <div class="hero-badge"><span class="pulse-dot" style="width:6px;height:6px;"></span> <span data-en="Now onboarding pilot plants for 2026" data-da="Nu onboarder vi pilotanlg for 2026">Now onboarding pilot plants for 2026</span></div>
+            <h1><span data-en="Predictable Plants Start with " data-da="Forudsigelige anlg starter med ">Predictable Plants Start with </span><span><span data-en="Cement Intelligence" data-da="Cement Intelligence">Cement Intelligence</span></span></h1>
+            <p class="hero-subtitle" data-en="Vaerdy digitizes cement plant maintenance from inspections and execution to spares and analytics — so you can stop reacting and start predicting." data-da="Vaerdy digitaliserer cementanlgs vedligeholdelse fra inspektioner og udfrelse til reservedele og analyser — s du kan stoppe med at reagere og begynde at forudsige.">Vaerdy digitizes cement plant maintenance from inspections and execution to spares and analytics — so you can stop reacting and start predicting.</p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn btn-teal btn-large" data-en="Request a Demo" data-da="Anmod om Demo">Request a Demo</a>
+                <a href="#calculator" class="btn btn-outline btn-large" style="border-color:rgba(255,255,255,0.3);color:#fff" data-en="Calculate Your ROI" data-da="Beregn din ROI">Calculate Your ROI</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-number counter" data-target="8.5" data-prefix="&euro;" data-suffix="B+" data-decimal="true">&#8364;0</div>
+                    <div class="hero-stat-label" data-en="Annual savings potential" data-da="rligt besparelsespotentiale">Annual savings potential</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number counter" data-target="3000" data-suffix="+">0</div>
+                    <div class="hero-stat-label" data-en="Cement plants worldwide" data-da="Cementanlg verdensplan">Cement plants worldwide</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number" style="background:linear-gradient(135deg,var(--teal-light),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent">10-30x</div>
+                    <div class="hero-stat-label" data-en="Customer ROI" data-da="Kunde ROI">Customer ROI</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-card" id="heroCard">
+                <div class="hero-card-header">
+                    <div class="hero-card-icon">&#9881;</div>
+                    <div class="hero-card-title">AI Diagnosis</div>
+                    <div class="hero-card-live"><span class="live-dot"></span> LIVE</div>
+                </div>
+                <div class="hero-card-item"><div class="hero-card-dot dot-teal"></div><span class="hero-card-item-text">Vibration Analysis</span><span class="hero-card-item-value">OK</span></div>
+                <div class="hero-card-item"><div class="hero-card-dot dot-yellow"></div><span class="hero-card-item-text">Acoustic Signal</span><span class="hero-card-item-value" style="color:var(--gold)">Alert</span></div>
+                <div class="hero-card-item"><div class="hero-card-dot dot-green"></div><span class="hero-card-item-text">Visual Inspection</span><span class="hero-card-item-value">OK</span></div>
+                <div class="hero-card-item"><div class="hero-card-dot dot-blue"></div><span class="hero-card-item-text">Knowledge Base Match</span><span class="hero-card-item-value">87%</span></div>
+                <div class="hero-card-result">
+                    <div class="hero-card-result-title">Root Cause Identified</div>
+                    <div class="hero-card-result-text">Early-stage pinion misalignment. Action window: 2 weeks. Est. savings: &#8364;500k.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sources Ticker -->
+<div class="sources-ticker">
+    <div class="ticker-track" id="ticker">
+        <div class="ticker-item">&#128200; Data sourced from <strong>McKinsey & Company (2022)</strong></div>
+        <div class="ticker-item">&#128202; <strong>Deloitte</strong> Predictive Maintenance Report (2017)</div>
+        <div class="ticker-item">&#127959; <strong>FLSmidth</strong> OEE Benchmarks</div>
+        <div class="ticker-item">&#127758; <strong>CemBureau</strong> European Cement Association</div>
+        <div class="ticker-item">&#128218; <strong>Global Cement Report 2026</strong> — 3,100+ plants ex-China</div>
+        <div class="ticker-item">&#128200; <strong>Grand View Research 2024</strong> — CMMS market CAGR 10.5%</div>
+        <div class="ticker-item">&#128202; <strong>MarketsandMarkets 2024</strong> — Predictive maintenance CAGR 30.9%</div>
+        <!-- duplicate for seamless loop -->
+        <div class="ticker-item">&#128200; Data sourced from <strong>McKinsey & Company (2022)</strong></div>
+        <div class="ticker-item">&#128202; <strong>Deloitte</strong> Predictive Maintenance Report (2017)</div>
+        <div class="ticker-item">&#127959; <strong>FLSmidth</strong> OEE Benchmarks</div>
+        <div class="ticker-item">&#128218; <strong>Global Cement Report 2026</strong> — 3,100+ plants ex-China</div>
+        <div class="ticker-item">&#128200; <strong>Grand View Research 2024</strong> — CMMS market CAGR 10.5%</div>
+        <div class="ticker-item">&#128202; <strong>MarketsandMarkets 2024</strong> — Predictive maintenance CAGR 30.9%</div>
+    </div>
+</div>
+
+<!-- Problem Section -->
+<section class="problem" id="challenge">
+    <div class="section-inner">
+        <div class="text-center fade-in">
+            <div class="section-label">The Challenge</div>
+            <h2 class="section-title">Cement Maintenance is Broken</h2>
+            <p class="section-subtitle">Plants lose millions each year to reactive maintenance, knowledge gaps, and fragmented data.</p>
+        </div>
+        <div class="problem-grid">
+            <div class="problem-card fade-in delay-1"><div class="problem-icon red">&#9888;</div><h3>Knowledge Walking Out the Door</h3><p>Experienced engineers retire, taking decades of tacit maintenance knowledge with them. OEM manuals sit unread in filing cabinets.</p></div>
+            <div class="problem-card fade-in delay-2"><div class="problem-icon orange">&#128200;</div><h3>Reactive, Not Predictive</h3><p>Over 50% of maintenance is reactive. A single unplanned kiln stop can cost &#8364;300k or more. Root-cause investigations take weeks.</p></div>
+            <div class="problem-card fade-in delay-3"><div class="problem-icon purple">&#128451;</div><h3>Data Silos Everywhere</h3><p>CMMS, ERP, spreadsheets, and paper inspections — critical data trapped across disconnected systems.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- Stat Banner -->
+<div class="stat-banner">
+    <div class="stat-banner-inner">
+        <div class="stat-item scale-in delay-1"><div class="stat-number counter" data-target="300" data-prefix="&euro;" data-suffix="k/day">&#8364;0</div><div class="stat-label">Cost of one unplanned kiln stop</div></div>
+        <div class="stat-item scale-in delay-2"><div class="stat-number counter" data-target="50" data-suffix="%+">0</div><div class="stat-label">of maintenance is still reactive</div></div>
+        <div class="stat-item scale-in delay-3"><div class="stat-number counter" data-target="5" data-prefix="3-" data-suffix="%">0</div><div class="stat-label">of production cost lost to poor maintenance</div></div>
+        <div class="stat-item scale-in delay-4"><div class="stat-number counter" data-target="85" data-prefix="~" data-suffix="%">0</div><div class="stat-label">OEE achievable vs 65-70% today</div></div>
+    </div>
+</div>
+
+<!-- Platform -->
+<section class="platform" id="platform">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">The Platform</div><h2 class="section-title">Cement Intelligence, Purpose-Built</h2><p class="section-subtitle">Every module designed for the realities of cement plant operations.</p></div>
+        <div class="platform-grid">
+            <div class="platform-card fade-in delay-1"><div class="platform-card-icon">&#129504;</div><h3>Cement-Native AI</h3><p>SLMs trained on OEM manuals, failure cases, and plant data. Knowledge delivered directly to frontline teams.</p></div>
+            <div class="platform-card fade-in delay-2"><div class="platform-card-icon">&#128225;</div><h3>Multimodal Predictive AI</h3><p>Vibration, acoustic, images, and knowledge combined. Root-cause diagnosis in minutes — not weeks.</p></div>
+            <div class="platform-card fade-in delay-3"><div class="platform-card-icon">&#128241;</div><h3>Mobile-First Execution</h3><p>Digitized inspections enforced at the point of work. PTW, LOTO, work orders — all from the field.</p></div>
+            <div class="platform-card fade-in delay-4"><div class="platform-card-icon">&#127959;</div><h3>Digital Twin Taxonomy</h3><p>6-level hierarchy from Country to Part. Auto-generated from your Bill of Materials.</p></div>
+            <div class="platform-card fade-in delay-5"><div class="platform-card-icon">&#128176;</div><h3>CFO-Ready Dashboards</h3><p>OEE, cost per tonne, downtime — in the language finance understands.</p></div>
+            <div class="platform-card fade-in delay-6"><div class="platform-card-icon">&#128260;</div><h3>ERP &amp; SCADA Integration</h3><p>Bi-directional SAP/Oracle sync, OPC-UA streaming, auto PO triggers.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- Before/After -->
+<section class="before-after" id="before-after">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">The Transformation</div><h2 class="section-title">Without Vaerdy vs. With Vaerdy</h2><p class="section-subtitle">See the difference intelligent maintenance makes.</p></div>
+        <div class="ba-container fade-in">
+            <div class="ba-wrapper">
+                <div class="ba-side ba-before" id="baBefore">
+                    <div class="ba-label">WITHOUT VAERDY</div>
+                    <div class="ba-item"><span class="ba-icon-bad">&#10060;</span> Paper-based inspections</div>
+                    <div class="ba-item"><span class="ba-icon-bad">&#10060;</span> Reactive maintenance (50%+)</div>
+                    <div class="ba-item"><span class="ba-icon-bad">&#10060;</span> Knowledge lost with retirees</div>
+                    <div class="ba-item"><span class="ba-icon-bad">&#10060;</span> &#8364;300k per unplanned stop</div>
+                    <div class="ba-item"><span class="ba-icon-bad">&#10060;</span> Spreadsheet KPIs</div>
+                    <div class="ba-item"><span class="ba-icon-bad">&#10060;</span> 65-70% OEE</div>
+                </div>
+                <div class="ba-side ba-after" id="baAfter">
+                    <div class="ba-label">WITH VAERDY</div>
+                    <div class="ba-item"><span class="ba-icon-good">&#10004;</span> Mobile-first digital execution</div>
+                    <div class="ba-item"><span class="ba-icon-good">&#10004;</span> Predictive AI maintenance</div>
+                    <div class="ba-item"><span class="ba-icon-good">&#10004;</span> AI knowledge base for all</div>
+                    <div class="ba-item"><span class="ba-icon-good">&#10004;</span> Failures predicted 40 days ahead</div>
+                    <div class="ba-item"><span class="ba-icon-good">&#10004;</span> CFO-ready live dashboards</div>
+                    <div class="ba-item"><span class="ba-icon-good">&#10004;</span> 85%+ OEE achievable</div>
+                </div>
+                <div class="ba-slider-line" id="baSlider">
+                    <div class="ba-slider-handle">&#8596;</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works" id="how-it-works">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">How It Works</div><h2 class="section-title">From Discovery to Predictive Operations</h2><p class="section-subtitle">Deployed in weeks — not years.</p></div>
+        <div class="steps">
+            <div class="step fade-in delay-1"><div class="step-number">1</div><h3>Discovery</h3><p>1 week on-site. Map assets, define scope, deliver proposal.</p></div>
+            <div class="step fade-in delay-2"><div class="step-number">2</div><h3>Digital Foundation</h3><p>8-12 weeks. App ready with digital asset foundation.</p></div>
+            <div class="step fade-in delay-3"><div class="step-number">3</div><h3>Scale &amp; Integrate</h3><p>20-24 weeks. SLMs, dashboards, ERP sync active.</p></div>
+            <div class="step fade-in delay-4"><div class="step-number">4</div><h3>Predict &amp; Optimize</h3><p>Predictive AI. Every work order strengthens the system.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- AI Infographic -->
+<section class="ai-infographic" id="ai-engine">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">Multimodal AI Engine</div><h2 class="section-title">4 Sources. 1 Diagnosis. Minutes, Not Weeks.</h2><p class="section-subtitle">Vaerdy combines four signal sources with cement-specific AI for root-cause diagnosis.</p></div>
+        <div class="ai-flow fade-in">
+            <div class="ai-signal"><div class="ai-signal-icon">&#128200;</div><h4>Vibration</h4><p>3-20kHz sensors</p></div>
+            <div class="ai-signal"><div class="ai-signal-icon">&#127911;</div><h4>Acoustics</h4><p>Microphone analysis</p></div>
+            <div class="ai-signal"><div class="ai-signal-icon">&#128247;</div><h4>Visual</h4><p>Mobile photo AI</p></div>
+            <div class="ai-signal"><div class="ai-signal-icon">&#128218;</div><h4>Knowledge</h4><p>OEM + failure library</p></div>
+            <div class="ai-arrow">&#10132;</div>
+            <div class="ai-brain"><div class="ai-brain-icon">&#129504;</div><h4>VAERDY AI</h4><p>Cement SLM Engine</p></div>
+            <div class="ai-arrow">&#10132;</div>
+            <div class="ai-output">
+                <h4>&#10004; Actionable Output</h4>
+                <div class="ai-output-item">&#128269; Root cause identified</div>
+                <div class="ai-output-item">&#128197; Action window defined</div>
+                <div class="ai-output-item">&#128295; Work order auto-created</div>
+                <div class="ai-output-item">&#128230; Spares pre-ordered</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ROI Calculator -->
+<section class="calculator" id="calculator">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">ROI Calculator</div><h2 class="section-title">See What Your Plant Could Save</h2><p class="section-subtitle">Adjust the sliders to match your plant.</p></div>
+        <div class="calc-container">
+            <div class="calc-inputs fade-in-left">
+                <h3>Your Plant Profile</h3><p>Configure your plant for personalized estimates.</p>
+                <div class="calc-field"><label>Annual Maintenance Spend</label><div class="calc-current-value" id="maintSpendDisplay">&#8364;8M</div><input type="range" id="maintSpend" min="4" max="15" value="8" step="0.5" oninput="updateCalc()"><div class="calc-range-labels"><span>&#8364;4M</span><span>&#8364;15M</span></div></div>
+                <div class="calc-field"><label>Unplanned Stops Per Year (days)</label><div class="calc-current-value" id="stopsDisplay">4 days</div><input type="range" id="stops" min="1" max="12" value="4" step="1" oninput="updateCalc()"><div class="calc-range-labels"><span>1 day</span><span>12 days</span></div></div>
+                <div class="calc-field"><label>Plant Capacity (TPD)</label><div class="calc-current-value" id="capacityDisplay">3,000 TPD</div><input type="range" id="capacity" min="1000" max="8000" value="3000" step="500" oninput="updateCalc()"><div class="calc-range-labels"><span>1,000</span><span>8,000</span></div></div>
+            </div>
+            <div class="calc-results fade-in-right">
+                <h3>Your Projected Annual Savings</h3>
+                <div class="calc-result-item"><span class="calc-result-label">Maintenance cost reduction (15%)</span><span class="calc-result-value" id="resultMaint" style="color:var(--teal-light)">&#8364;1.2M</span></div>
+                <div class="calc-result-item"><span class="calc-result-label">Avoided unplanned downtime</span><span class="calc-result-value" id="resultDowntime" style="color:var(--teal-light)">&#8364;1.2M</span></div>
+                <div class="calc-result-item"><span class="calc-result-label">OEE improvement value (4%)</span><span class="calc-result-value" id="resultOEE" style="color:var(--teal-light)">&#8364;0.8M</span></div>
+                <div class="calc-result-item"><span class="calc-result-label">Vaerdy subscription</span><span class="calc-result-value" id="resultSub" style="color:rgba(255,255,255,0.5)">-&#8364;150k</span></div>
+                <div class="calc-total-box"><div class="calc-total-label">Net Annual Value</div><div class="calc-total-value" id="resultTotal">&#8364;3.1M</div><div class="calc-total-sub"><span id="resultROI">21</span>x Return on Investment</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Case Study Teaser -->
+<section class="case-study" id="case-study">
+    <div class="section-inner">
+        <div class="case-grid">
+            <div class="case-visual fade-in-left">
+                <div class="case-big-number">&#8364;2.1M</div>
+                <div class="case-big-label">Annual savings achieved</div>
+                <div class="case-mini-stats">
+                    <div class="case-mini-stat"><h4>4</h4><p>Kiln stops avoided</p></div>
+                    <div class="case-mini-stat"><h4>23%</h4><p>Maintenance cost reduction</p></div>
+                    <div class="case-mini-stat"><h4>82%</h4><p>OEE achieved</p></div>
+                </div>
+            </div>
+            <div class="case-text fade-in-right">
+                <div class="section-label">Case Study</div>
+                <h3>How a 3,000 TPD Plant Transformed Maintenance</h3>
+                <p>A North African cement producer deployed Vaerdy across their flagship plant. Within 6 months, they avoided 4 unplanned kiln stops, reduced maintenance costs by 23%, and achieved 82% OEE — up from 68%.</p>
+                <div class="case-form">
+                    <h4>&#128274; Download the full case study</h4>
+                    <input type="email" id="caseEmail" placeholder="Your work email">
+                    <button class="btn btn-teal" style="width:100%" onclick="submitCaseForm()">Get the Case Study</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials" id="testimonials">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">Industry Perspective</div><h2 class="section-title">The Problems Vaerdy Was Built to Solve</h2></div>
+        <div class="testimonial-grid">
+            <div class="testimonial-card fade-in delay-1"><div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testimonial-text">"We spend &#8364;10M a year on maintenance, yet we can't predict our next kiln stop. When our best engineer retired, 30 years of knowledge walked out the door."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--teal),var(--green))">PM</div><div class="testimonial-author-info"><h4>Plant Maintenance Director</h4><p>European cement group</p></div></div></div>
+            <div class="testimonial-card fade-in delay-2"><div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testimonial-text">"Our board wants OEE and cost per tonne. My team gives me vibration data. The translation layer between operations and finance doesn't exist."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--gold),#e08a3a)">CO</div><div class="testimonial-author-info"><h4>Chief Operations Officer</h4><p>North African cement producer</p></div></div></div>
+            <div class="testimonial-card fade-in delay-3"><div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testimonial-text">"We tried three CMMS platforms. None understood cement. We need a system that knows a kiln from a ball mill."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:linear-gradient(135deg,#6a5acd,var(--teal))">VP</div><div class="testimonial-author-info"><h4>VP Technical Services</h4><p>Global cement manufacturer</p></div></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- Competitive Edge -->
+<section class="competitive" id="edge">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">Why Vaerdy Wins</div><h2 class="section-title">A Moat That Deepens Over Time</h2><p class="section-subtitle">Domain depth + proprietary AI + data flywheel.</p></div>
+        <div class="edge-grid">
+            <div class="edge-card fade-in delay-1"><div class="edge-icon">&#129504;</div><h3>Cement-Specific SLM</h3><p>Trained on real cement OEM manuals, failure cases, and plant data.</p></div>
+            <div class="edge-card fade-in delay-2"><div class="edge-icon">&#128260;</div><h3>Data Flywheel</h3><p>Every work order strengthens the AI. Compounding advantage no one can replicate.</p></div>
+            <div class="edge-card fade-in delay-3"><div class="edge-icon">&#127959;</div><h3>6-Level Taxonomy</h3><p>Country to Part. Auto-generated from BOM. Unmatched granularity.</p></div>
+            <div class="edge-card fade-in delay-4"><div class="edge-icon">&#128241;</div><h3>True Mobile</h3><p>PWA, offline, QR, voice, glove-mode. Built for dusty plant floors.</p></div>
+            <div class="edge-card fade-in delay-5"><div class="edge-icon">&#128737;</div><h3>Built-In Safety</h3><p>Digital PTW, LOTO, permit archiving. Safety is core, not an add-on.</p></div>
+            <div class="edge-card fade-in delay-6"><div class="edge-icon">&#128200;</div><h3>CFO Language</h3><p>OEE into cost/tonne. Maintenance into EBITDA. Dashboards finance uses.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Story -->
+<section class="story" id="story">
+    <div class="section-inner"><div class="story-content">
+        <div class="fade-in-left">
+            <div class="section-label">Our Story</div>
+            <h2 class="section-title">Born from the Plant Floor</h2>
+            <div class="story-text">
+                <p>Vaerdy was born from a frustration shared by four professionals who spent their careers inside cement: the gap between what technology could deliver and what plants were getting was staggering.</p>
+                <p>Between them, Naveen, Adis, Shankar, and Haijie had 60+ combined years working with cement plants globally. They walked the floors, troubleshot breakdowns at 2 AM, watched knowledge retire with engineers, and saw millions lost to predictable failures.</p>
+                <p>They met through FLSmidth. But it was over a late-night conversation in 2025 that the idea crystallized: take everything they knew and put it into the hands of every frontline technician, in real time.</p>
+            </div>
+            <div class="story-quote">"Our goal is simple: fewer surprises, safer work, and better decisions."</div>
+            <p style="color:var(--text-muted);font-size:1.05rem;line-height:1.85">That became Vaerdy — from the Danish word for "value." Not a buzzword, but measurable: every euro saved, every hour reclaimed, every life made safer.</p>
+        </div>
+        <div class="fade-in-right">
+            <div class="story-values">
+                <div class="story-value"><div class="story-value-icon">&#128161;</div><h4>Value</h4><p>Measurable outcomes</p></div>
+                <div class="story-value"><div class="story-value-icon">&#129309;</div><h4>Trust</h4><p>Decades of relationships</p></div>
+                <div class="story-value"><div class="story-value-icon">&#128640;</div><h4>Innovation</h4><p>AI built for cement</p></div>
+            </div>
+            <div class="story-box"><h4>Our Vision</h4><p>The intelligence standard for cement plant operations worldwide — predictable production, zero-surprise maintenance, data-driven plant leaders.</p></div>
+            <div class="story-box" style="margin-top:1.5rem"><h4>Our Mission</h4><p>Digitize cement maintenance end-to-end — making every technician as effective as the best engineer who ever walked the plant.</p></div>
+        </div>
+    </div></div>
+</section>
+
+<!-- Team -->
+<section class="team" id="team">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">The Team</div><h2 class="section-title">60+ Years of Cement Expertise</h2><p class="section-subtitle">We lived it — on plant floors, in control rooms, alongside maintenance crews worldwide.</p></div>
+        <div class="team-grid">
+            <div class="team-card fade-in delay-1"><div class="team-avatar avatar-1">NS</div><h3>Naveen Seelam</h3><div class="team-role">Co-Founder</div><p class="team-bio">Former FLSmidth global service leader. 20+ years in lifecycle services, pyro/grinding systems, operational troubleshooting.</p></div>
+            <div class="team-card fade-in delay-2"><div class="team-avatar avatar-2">AZ</div><h3>Adis Zubcevic</h3><div class="team-role">Co-Founder</div><p class="team-bio">Former FLSmidth. 10+ years in product engineering, R&D, and commercial leadership in cement.</p></div>
+            <div class="team-card fade-in delay-3"><div class="team-avatar avatar-3">SM</div><h3>Shankar Marla</h3><div class="team-role">Co-Founder</div><p class="team-bio">Business transformation leader. 20+ years in SAP, IT consulting, service delivery, program management.</p></div>
+            <div class="team-card fade-in delay-4"><div class="team-avatar avatar-4">HL</div><h3>Haijie Li</h3><div class="team-role">Senior AI Consultant</div><p class="team-bio">Ph.D. Chalmers University. Process optimization specialist. Multi-model AI systems expert.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+    <div class="section-inner">
+        <div class="text-center fade-in"><div class="section-label">FAQ</div><h2 class="section-title">Common Questions</h2></div>
+        <div class="faq-grid">
+            <div class="faq-item fade-in"><div class="faq-question" onclick="toggleFaq(this)">How long does it take to go live?<span class="faq-chevron">&#9660;</span></div><div class="faq-answer"><div class="faq-answer-inner">Frontline teams can use the mobile app within 8-12 weeks. Full platform with predictive analytics is live within 20-24 weeks. We start with a 1-week discovery.</div></div></div>
+            <div class="faq-item fade-in"><div class="faq-question" onclick="toggleFaq(this)">Do you replace our ERP/CMMS?<span class="faq-chevron">&#9660;</span></div><div class="faq-answer"><div class="faq-answer-inner">No. Vaerdy sits alongside your systems. We simplify data capture, validate it, then sync back into SAP/Oracle via bi-directional integration.</div></div></div>
+            <div class="faq-item fade-in"><div class="faq-question" onclick="toggleFaq(this)">What makes this different from a generic CMMS?<span class="faq-chevron">&#9660;</span></div><div class="faq-answer"><div class="faq-answer-inner">Vaerdy is built exclusively for cement. Our AI, taxonomy, predictive models, and mobile execution are all cement-specific. We speak cement — from kiln alignment to ball charge optimization.</div></div></div>
+            <div class="faq-item fade-in"><div class="faq-question" onclick="toggleFaq(this)">What ROI can we expect?<span class="faq-chevron">&#9660;</span></div><div class="faq-answer"><div class="faq-answer-inner">For a 3,000 TPD plant: &#8364;3-5M annual value. Against &#8364;100-200k subscription = 10-30x ROI. Payback typically within 6 months.</div></div></div>
+            <div class="faq-item fade-in"><div class="faq-question" onclick="toggleFaq(this)">Does it work offline?<span class="faq-chevron">&#9660;</span></div><div class="faq-answer"><div class="faq-answer-inner">Yes. Full offline PWA capability. QR scanning, voice input, glove-mode. Syncs automatically when connection returns.</div></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- Partners -->
+<section class="partners">
+    <div class="section-inner text-center fade-in">
+        <div class="section-label">Collaborative Partners</div>
+        <h2 class="section-title" style="font-size:1.8rem">Trusted Technology Partners</h2>
+        <div class="partners-logos">
+            <img src="images/img_p15_Image2.jpg" alt="Bereej Technologies">
+            <img src="images/img_p15_Image3.jpg" alt="OptiSol">
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+    <div class="cta-inner">
+        <h2 class="fade-in">Ready to Make Your Plant Predictable?</h2>
+        <p class="fade-in">Start with a one-week discovery. No risk, no commitment.</p>
+        <div class="cta-buttons fade-in">
+            <a href="mailto:contact@vaerdy.com" class="btn btn-white btn-large">Request a Demo</a>
+            <a href="#calculator" class="btn btn-outline btn-large" style="border-color:rgba(255,255,255,0.3);color:#fff">Calculate Your ROI</a>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="booking-embed fade-in">
+            <h4>&#128197; Schedule a Discovery Call</h4>
+            <div class="booking-row">
+                <input type="text" placeholder="Full name">
+                <input type="email" placeholder="Work email">
+            </div>
+            <div class="booking-row">
+                <input type="text" placeholder="Company">
+                <select><option value="">Plant capacity (TPD)</option><option>1,000-2,000</option><option>2,000-4,000</option><option>4,000-6,000</option><option>6,000+</option></select>
+            </div>
+            <button class="btn btn-teal" style="width:100%;margin-top:0.5rem" onclick="alert('Thank you! We will contact you within 24 hours.')">Book Discovery Call</button>
+        </div>
+
+        <div class="cta-trust fade-in">No commitment required. Typical discovery: 1 week on-site.</div>
+
+        <!-- Compliance Badges -->
+        <div class="compliance fade-in">
+            <div class="compliance-badge"><span class="compliance-badge-icon">&#128274;</span> GDPR Compliant</div>
+            <div class="compliance-badge"><span class="compliance-badge-icon">&#128737;</span> ISO 27001 Ready</div>
+            <div class="compliance-badge"><span class="compliance-badge-icon">&#9989;</span> SOC 2 Aligned</div>
+            <div class="compliance-badge"><span class="compliance-badge-icon">&#128272;</span> End-to-End Encryption</div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand"><img src="images/img_p1_Image1.jpg" alt="Vaerdy"><p>Cement Intelligence. Digitizing maintenance to enable predictable plant operations.</p></div>
+        <div class="footer-col"><h4>Platform</h4><ul><li><a href="#platform">Knowledge Base</a></li><li><a href="#platform">Predictive AI</a></li><li><a href="#platform">Mobile Execution</a></li><li><a href="#platform">Analytics</a></li></ul></div>
+        <div class="footer-col"><h4>Company</h4><ul><li><a href="#story">Our Story</a></li><li><a href="#team">Team</a></li><li><a href="#edge">Why Vaerdy</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+        <div class="footer-col"><h4>Contact</h4><ul><li><a href="mailto:contact@vaerdy.com">contact@vaerdy.com</a></li><li><a href="#">Vaerdy ApS</a></li><li><a href="#">Denmark</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>&copy; 2026 Vaerdy ApS. All rights reserved.</span><span>Confidential</span></div>
+</footer>
+
+<script>
+// ── Loader ──
+window.addEventListener('load', () => { setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200); });
+
+// ── Scroll Progress ──
+window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    document.getElementById('scrollProgress').style.width = (window.scrollY / h * 100) + '%';
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    document.getElementById('floatingCta').classList.toggle('visible', window.scrollY > 800);
+});
+
+// ── Mobile menu ──
+function toggleMenu() { document.getElementById('navLinks').classList.toggle('open'); }
+document.querySelectorAll('.nav-links a').forEach(l => l.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open')));
+
+// ── Dark Mode ──
+function toggleTheme() {
+    const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = t;
+    document.getElementById('themeBtn').textContent = t === 'dark' ? '\u2600' : '\u263E';
+}
+
+// ── Language Toggle ──
+let currentLang = 'en';
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'da' : 'en';
+    document.getElementById('langBtn').textContent = currentLang.toUpperCase();
+    document.querySelectorAll('[data-' + currentLang + ']').forEach(el => {
+        const text = el.getAttribute('data-' + currentLang);
+        if (text) el.textContent = text;
+    });
+}
+
+// ── Scroll Animations ──
+const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.fade-in,.fade-in-left,.fade-in-right,.scale-in').forEach(el => obs.observe(el));
+
+// ── Counter Animation ──
+const counterObs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting && !e.target.dataset.animated) { e.target.dataset.animated = 'true'; animateCounter(e.target); } }); }, { threshold: 0.5 });
+document.querySelectorAll('.counter').forEach(el => counterObs.observe(el));
+function animateCounter(el) {
+    const target = parseFloat(el.dataset.target), prefix = el.dataset.prefix || '', suffix = el.dataset.suffix || '';
+    const isDecimal = el.dataset.decimal === 'true';
+    const dur = 2000, start = performance.now();
+    function upd(now) {
+        const p = Math.min((now - start) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = prefix + (isDecimal ? (e * target).toFixed(1) : Math.round(e * target).toLocaleString()) + suffix;
+        if (p < 1) requestAnimationFrame(upd);
+    }
+    requestAnimationFrame(upd);
+}
+
+// ── ROI Calculator ──
+function updateCalc() {
+    const m = parseFloat(document.getElementById('maintSpend').value);
+    const s = parseInt(document.getElementById('stops').value);
+    const c = parseInt(document.getElementById('capacity').value);
+    document.getElementById('maintSpendDisplay').innerHTML = '&#8364;' + m + 'M';
+    document.getElementById('stopsDisplay').textContent = s + (s === 1 ? ' day' : ' days');
+    document.getElementById('capacityDisplay').textContent = c.toLocaleString() + ' TPD';
+    const ms = m * 0.15, ds = (s * (c / 3000) * 300000) / 1e6, os = (c / 3000) * 0.8;
+    const sub = c >= 5000 ? 0.2 : c >= 2000 ? 0.15 : 0.1;
+    const tot = ms + ds + os - sub;
+    document.getElementById('resultMaint').innerHTML = '&#8364;' + ms.toFixed(1) + 'M';
+    document.getElementById('resultDowntime').innerHTML = '&#8364;' + ds.toFixed(1) + 'M';
+    document.getElementById('resultOEE').innerHTML = '&#8364;' + os.toFixed(1) + 'M';
+    document.getElementById('resultSub').innerHTML = '-&#8364;' + (sub * 1000).toFixed(0) + 'k';
+    document.getElementById('resultTotal').innerHTML = '&#8364;' + tot.toFixed(1) + 'M';
+    document.getElementById('resultROI').textContent = Math.round(tot / sub);
+}
+updateCalc();
+
+// ── FAQ ──
+function toggleFaq(el) {
+    const item = el.parentElement, was = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!was) item.classList.add('open');
+}
+
+// ── Chat Widget ──
+function toggleChat() { document.getElementById('chatWindow').classList.toggle('open'); }
+function sendChat() {
+    const input = document.getElementById('chatInput');
+    if (!input.value.trim()) return;
+    const body = document.getElementById('chatBody');
+    body.innerHTML += '<div class="chat-msg user">' + input.value.replace(/</g, '&lt;') + '</div>';
+    const q = input.value.toLowerCase(); input.value = '';
+    setTimeout(() => {
+        let r = "Thanks for your message! A team member will get back to you shortly. You can also email us at contact@vaerdy.com.";
+        if (q.includes('pric') || q.includes('cost')) r = "Our subscription starts at \u20AC100k/year per plant, delivering 10-30x ROI. Want to schedule a call to discuss?";
+        else if (q.includes('demo')) r = "We'd love to show you a demo! Please leave your email and we'll set it up within 24 hours.";
+        else if (q.includes('how') && q.includes('work')) r = "We start with a 1-week on-site discovery. The platform goes live in 8-12 weeks. Full predictive capabilities in 20-24 weeks.";
+        body.innerHTML += '<div class="chat-msg bot">' + r + '</div>';
+        body.scrollTop = body.scrollHeight;
+    }, 800);
+}
+
+// ── Before/After Slider ──
+(function() {
+    const slider = document.getElementById('baSlider');
+    const container = slider ? slider.parentElement : null;
+    if (!slider || !container) return;
+    let dragging = false;
+    function move(x) {
+        const rect = container.getBoundingClientRect();
+        let pct = ((x - rect.left) / rect.width) * 100;
+        pct = Math.max(15, Math.min(85, pct));
+        slider.style.left = pct + '%';
+        document.getElementById('baBefore').style.width = pct + '%';
+        document.getElementById('baAfter').style.width = (100 - pct) + '%';
+        document.getElementById('baAfter').style.left = pct + '%';
+    }
+    slider.addEventListener('mousedown', () => dragging = true);
+    slider.addEventListener('touchstart', () => dragging = true);
+    window.addEventListener('mouseup', () => dragging = false);
+    window.addEventListener('touchend', () => dragging = false);
+    window.addEventListener('mousemove', e => { if (dragging) move(e.clientX); });
+    window.addEventListener('touchmove', e => { if (dragging) move(e.touches[0].clientX); });
+})();
+
+// ── Particle Canvas ──
+(function() {
+    const c = document.getElementById('particleCanvas');
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    let w, h, particles = [];
+    function resize() { w = c.width = c.parentElement.offsetWidth; h = c.height = c.parentElement.offsetHeight; }
+    resize(); window.addEventListener('resize', resize);
+    for (let i = 0; i < 50; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, r: Math.random()*2+1 });
+    function draw() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0) p.x = w; if (p.x > w) p.x = 0; if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(13,139,139,0.3)'; ctx.fill();
+        });
+        // Draw connections
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+                const d = Math.sqrt(dx*dx + dy*dy);
+                if (d < 150) {
+                    ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = 'rgba(13,139,139,' + (0.15 * (1 - d/150)) + ')';
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+// ── Hero Card Parallax ──
+document.addEventListener('mousemove', e => {
+    const card = document.getElementById('heroCard');
+    if (!card || window.innerWidth < 768) return;
+    const r = card.getBoundingClientRect();
+    const dx = (e.clientX - r.left - r.width/2) / 50;
+    const dy = (e.clientY - r.top - r.height/2) / 50;
+    card.style.transform = 'perspective(1000px) rotateY(' + dx + 'deg) rotateX(' + (-dy) + 'deg)';
+});
+
+// ── Exit Intent ──
+let exitShown = false;
+document.addEventListener('mouseleave', e => {
+    if (e.clientY <= 0 && !exitShown) { exitShown = true; document.getElementById('exitPopup').classList.add('show'); }
+});
+function closeExitPopup() { document.getElementById('exitPopup').classList.remove('show'); }
+function submitExitForm() { closeExitPopup(); alert('Thank you! Check your inbox for the whitepaper.'); }
+function submitCaseForm() { alert('Thank you! The case study will be sent to your email.'); }
+</script>
+</body>
+</html>
